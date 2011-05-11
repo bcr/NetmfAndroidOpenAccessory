@@ -1,0 +1,10 @@
+*.suo
+*.user
+[Oo]bj
+[Bb]in
+OnBoardFlash.dat
+*.userprefs
+*.pidb
+*.testsettings
+*.vsmdi
+TestResults
