@@ -13,47 +13,24 @@ namespace Prototype.AndroidOpenAccessory.Fez
     {
         public static void Main()
         {
+            USBH_RawDevice openedDevice = null;
+            var deviceOpened = new ManualResetEvent(false);
+
             Debug.Print("Running");
             // Subscribe to USBH events.
-            USBHostController.DeviceConnectedEvent += DeviceConnectedEvent;
-            USBHostController.DeviceDisconnectedEvent += DeviceDisconnectedEvent;
+            USBHostController.DeviceConnectedEvent += (device) => { openedDevice = new USBH_RawDevice(device); deviceOpened.Set(); };
             Debug.Print("Listening for events");
 
-            // Sleep forever
-            Thread.Sleep(Timeout.Infinite);
+            deviceOpened.WaitOne();
+            deviceOpened.Reset();
+            Debug.Print("Got our raw device");
+
+            var dataBytes = new byte[2];
+            openedDevice.SendSetupTransfer(0xC0, 51, 0, 1, dataBytes, 0, dataBytes.Length);
+            Debug.Print("Received " + dataBytes[0] + ", " + dataBytes[1]);
         }
 
         // http://www.beyondlogic.org/usbnutshell/usb6.shtml
-
-        static void DeviceConnectedEvent(USBH_Device device)
-        {
-            Debug.Print("Device connected...");
-            Debug.Print("ID: " + device.ID + ", Interface: " + device.INTERFACE_INDEX + ", Type: " + device.TYPE);
-            Debug.Print("Vendor ID: " + device.VENDOR_ID + ", Product ID:" + device.PRODUCT_ID);
-            // If it's an Android device, we can party
-            // Make sure it's in accessory mode
-            // Ask him if he supports accessory mode
-            // Open the device
-            var openedDevice = new USBH_RawDevice(device);
-            var dataBytes = new byte[2];
-            Debug.Print("Going to SendSetupTransfer");
-            dataBytes[0] = 0xBE;
-            dataBytes[1] = 0xEF;
-            //openedDevice.SendSetupTransfer(0x40, 51, 0, 0);
-            openedDevice.SendSetupTransfer(0x40, 51, 0, 0, dataBytes, 0, dataBytes.Length);
-            Debug.Print("Back from SendSetupTransfer");
-            //var endpoint0 = openedDevice.GetConfigurationDescriptors(0).interfaces[0].endpoints[0];
-            //Debug.Print((endpoint0 != null) ? "Endpoint is NOT null" : "GAA ENDPOINT IS NULL");
-            //var endpoint0Pipe = openedDevice.OpenPipe(endpoint0);
-            //endpoint0Pipe.TransferData(dataBytes, 0, dataBytes.Length);
-            //Debug.Print("Received " + dataBytes[0] + ", " + dataBytes[1]);
-        }
-
-        static void DeviceDisconnectedEvent(USBH_Device device)
-        {
-            Debug.Print("Device disconnected...");
-            Debug.Print("ID: " + device.ID + ", Interface: " + device.INTERFACE_INDEX + ", Type: " + device.TYPE);
-            Debug.Print("Vendor ID: " + device.VENDOR_ID + ", Product ID:" + device.PRODUCT_ID);
-        }
+        // http://forum.pololu.com/viewtopic.php?f=16&t=3154
     }
 }
