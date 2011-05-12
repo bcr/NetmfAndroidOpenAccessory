@@ -54,9 +54,18 @@ namespace Prototype.AndroidOpenAccessory.Fez
             return (dataBytes[1] << 8) | dataBytes[0];
         }
 
-        static void SetString(USBH_RawDevice openedDevice, AndroidAccessoryStringTypes stringType, string value)
+        static byte[] StringToUtf8NulTerminatedByteArray(string value)
         {
             var utf8Bytes = System.Text.Encoding.UTF8.GetBytes(value);
+            var finalBytes = new byte[utf8Bytes.Length + 1];
+            System.Array.Copy(utf8Bytes, finalBytes, utf8Bytes.Length);
+
+            return finalBytes;
+        }
+
+        static void SetString(USBH_RawDevice openedDevice, AndroidAccessoryStringTypes stringType, string value)
+        {
+            var utf8Bytes = StringToUtf8NulTerminatedByteArray(value);
             openedDevice.SendSetupTransfer(
                 (byte)(UsbRequestType.Vendor),
                 (byte)AndroidAccessoryUsbCommands.SetString,
@@ -96,6 +105,15 @@ namespace Prototype.AndroidOpenAccessory.Fez
 
             Debug.Print("Protocol version = " + GetProtocol(openedDevice));
 
+            // !!! THIS Thread.Sleep IS A HACK
+            // It's not clear what the problem is, but if you don't pause here
+            // then the PID on restart is the old PID. I don't know if this is
+            // something stupid in the USB stack (someone kept old device info
+            // around) or if this is something stupid on the Android side or
+            // if it's something stupid I'm doing. But this makes it feel
+            // better in my environment. I would love if it went away.
+
+            Thread.Sleep(375);
             SetString(openedDevice, AndroidAccessoryStringTypes.Description, "Prototype Engineering NETMF bridge");
             SetString(openedDevice, AndroidAccessoryStringTypes.ManufacturerName, "Prototype Engineering, LLC");
             SetString(openedDevice, AndroidAccessoryStringTypes.ModelName, "Model 1 baby");
@@ -104,7 +122,6 @@ namespace Prototype.AndroidOpenAccessory.Fez
             SetString(openedDevice, AndroidAccessoryStringTypes.Version, "1.2.3");
             Debug.Print("Strings set");
 
-            deviceOpened.Reset();
             StartAccessoryMode(openedDevice);
 
             Debug.Print("Waiting for re-enumeration");
