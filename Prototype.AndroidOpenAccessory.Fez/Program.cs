@@ -130,6 +130,43 @@ namespace Prototype.AndroidOpenAccessory.Fez
             Debug.Print("Got our new device");
 
             Debug.Print("Vendor ID = " + openedDevice.VENDOR_ID + ", Product ID = " + openedDevice.PRODUCT_ID);
+
+            // Now do the scavenger hunt for the IN / OUT endpoints
+
+            var configurationDescriptor = openedDevice.GetConfigurationDescriptors(0);
+            USBH_RawDevice.Pipe outPipe = null;
+            USBH_RawDevice.Pipe inPipe = null;
+
+            // Set the configuration http://developer.android.com/guide/topics/usb/adk.html#establish
+            openedDevice.SendSetupTransfer(0x00, 0x09, configurationDescriptor.bConfigurationValue, 0x00);
+
+            var _interface = configurationDescriptor.interfaces[0];
+            //foreach (var _interface in configurationDescriptor.interfaces)
+            {
+                Debug.Print("Interface class = " + _interface.bInterfaceClass + ", subclass = " + _interface.bInterfaceSubclass);
+
+                foreach (var endpoint in _interface.endpoints)
+                {
+                    Debug.Print("Endpoint descriptor type = " + endpoint.bDescriptorType + ", address = " + endpoint.bEndpointAddress + ", attributes = " + endpoint.bmAttributes);
+                    if ((endpoint.bEndpointAddress & 0x80) != 0)
+                    {
+                        Debug.Print("Opening inPipe");
+                        inPipe = openedDevice.OpenPipe(endpoint);
+                    }
+                    else
+                    {
+                        Debug.Print("Opening outPipe");
+                        outPipe = openedDevice.OpenPipe(endpoint);
+                    }
+                }
+            }
+
+            Debug.Print("Pipes opened");
+
+            var inBuffer = new byte[inPipe.PipeEndpoint.wMaxPacketSize];
+            Debug.Print("Going to TransferData");
+            var bytesRead = inPipe.TransferData(inBuffer, 0, inBuffer.Length);
+            Debug.Print("Back fromTransferData, bytesRead = " + bytesRead);
         }
 
         // http://www.beyondlogic.org/usbnutshell/usb6.shtml
