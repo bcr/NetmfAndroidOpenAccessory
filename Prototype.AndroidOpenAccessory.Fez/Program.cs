@@ -206,7 +206,7 @@ namespace Prototype.AndroidOpenAccessory.Fez
                         default:
                             break;
                     }
-                    outBuffer[0] = (byte)((LED.Read() ? FezUsbResponse.LedOn : 0) | (button.Read() ? FezUsbResponse.ButtonDown : 0));
+                    outBuffer[0] = (byte)((LED.Read() ? FezUsbResponse.LedOn : 0) | ((!button.Read()) ? FezUsbResponse.ButtonDown : 0));
                     outPipe.TransferData(outBuffer, 0, 1);
                 }
             }
