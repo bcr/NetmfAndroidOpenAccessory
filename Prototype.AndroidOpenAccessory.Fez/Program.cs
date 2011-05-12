@@ -38,6 +38,22 @@ namespace Prototype.AndroidOpenAccessory.Fez
             Vendor = 0x40,
         }
 
+        enum FezUsbCommands : byte
+        {
+            None = 0,
+            LedOn = 1,
+            LedOff = 2,
+            GetState = 3,
+        }
+
+        [Flags]
+        enum FezUsbResponse : byte
+        {
+            None = 0,
+            ButtonDown = 0x80,
+            LedOn = 0x40,
+        }
+
         public static int GetProtocol(USBH_RawDevice openedDevice)
         {
             var dataBytes = new byte[2];
@@ -163,10 +179,38 @@ namespace Prototype.AndroidOpenAccessory.Fez
 
             Debug.Print("Pipes opened");
 
+            DoProtocol(inPipe, outPipe);
+        }
+
+        private static void DoProtocol(USBH_RawDevice.Pipe inPipe, USBH_RawDevice.Pipe outPipe)
+        {
             var inBuffer = new byte[inPipe.PipeEndpoint.wMaxPacketSize];
-            Debug.Print("Going to TransferData");
-            var bytesRead = inPipe.TransferData(inBuffer, 0, inBuffer.Length);
-            Debug.Print("Back fromTransferData, bytesRead = " + bytesRead);
+            var outBuffer = new byte[outPipe.PipeEndpoint.wMaxPacketSize];
+            int bytesTransferred;
+            OutputPort LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, true);
+            InputPort button = new InputPort((Cpu.Pin)FEZ_Pin.Digital.LDR, false, Port.ResistorMode.PullUp);
+
+            while (true)
+            {
+                bytesTransferred = inPipe.TransferData(inBuffer, 0, 1);
+                if (bytesTransferred > 0)
+                {
+                    Debug.Print("Received " + inBuffer[0]);
+                    switch ((FezUsbCommands) inBuffer[0])
+                    {
+                        case FezUsbCommands.LedOff:
+                            LED.Write(false);
+                            break;
+                        case FezUsbCommands.LedOn:
+                            LED.Write(true);
+                            break;
+                        default:
+                            break;
+                    }
+                    outBuffer[0] = (byte)((LED.Read() ? FezUsbResponse.LedOn : 0) | (button.Read() ? FezUsbResponse.ButtonDown : 0));
+                    outPipe.TransferData(outBuffer, 0, 1);
+                }
+            }
         }
 
         // http://www.beyondlogic.org/usbnutshell/usb6.shtml
