@@ -54,6 +54,30 @@ namespace Prototype.AndroidOpenAccessory.Fez
             return (dataBytes[1] << 8) | dataBytes[0];
         }
 
+        static void SetString(USBH_RawDevice openedDevice, AndroidAccessoryStringTypes stringType, string value)
+        {
+            var utf8Bytes = System.Text.Encoding.UTF8.GetBytes(value);
+            openedDevice.SendSetupTransfer(
+                (byte)(UsbRequestType.Vendor),
+                (byte)AndroidAccessoryUsbCommands.SetString,
+                0,
+                (ushort) stringType,
+                utf8Bytes,
+                0,
+                utf8Bytes.Length
+                );
+        }
+
+        static void StartAccessoryMode(USBH_RawDevice openedDevice)
+        {
+            openedDevice.SendSetupTransfer(
+                (byte)(UsbRequestType.Vendor),
+                (byte)AndroidAccessoryUsbCommands.StartAccessoryMode,
+                0,
+                0
+                );
+        }
+
         public static void Main()
         {
             USBH_RawDevice openedDevice = null;
@@ -61,7 +85,7 @@ namespace Prototype.AndroidOpenAccessory.Fez
 
             Debug.Print("Running");
             // Subscribe to USBH events.
-            USBHostController.DeviceConnectedEvent += (device) => { openedDevice = new USBH_RawDevice(device); deviceOpened.Set(); };
+            USBHostController.DeviceConnectedEvent += (device) => { Debug.Print("Device connected Vendor ID = " + device.VENDOR_ID + ", Product ID = " + device.PRODUCT_ID); openedDevice = new USBH_RawDevice(device); deviceOpened.Set(); };
             Debug.Print("Listening for events");
 
             deviceOpened.WaitOne();
@@ -71,6 +95,24 @@ namespace Prototype.AndroidOpenAccessory.Fez
             Debug.Print("Vendor ID = " + openedDevice.VENDOR_ID + ", Product ID = " + openedDevice.PRODUCT_ID);
 
             Debug.Print("Protocol version = " + GetProtocol(openedDevice));
+
+            SetString(openedDevice, AndroidAccessoryStringTypes.Description, "Prototype Engineering NETMF bridge");
+            SetString(openedDevice, AndroidAccessoryStringTypes.ManufacturerName, "Prototype Engineering, LLC");
+            SetString(openedDevice, AndroidAccessoryStringTypes.ModelName, "Model 1 baby");
+            SetString(openedDevice, AndroidAccessoryStringTypes.SerialNumber, "12345");
+            SetString(openedDevice, AndroidAccessoryStringTypes.Uri, "http://http://prototype-eng.com/");
+            SetString(openedDevice, AndroidAccessoryStringTypes.Version, "1.2.3");
+            Debug.Print("Strings set");
+
+            deviceOpened.Reset();
+            StartAccessoryMode(openedDevice);
+
+            Debug.Print("Waiting for re-enumeration");
+            deviceOpened.WaitOne();
+            deviceOpened.Reset();
+            Debug.Print("Got our new device");
+
+            Debug.Print("Vendor ID = " + openedDevice.VENDOR_ID + ", Product ID = " + openedDevice.PRODUCT_ID);
         }
 
         // http://www.beyondlogic.org/usbnutshell/usb6.shtml
