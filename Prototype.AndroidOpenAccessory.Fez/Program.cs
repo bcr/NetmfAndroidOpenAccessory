@@ -133,7 +133,7 @@ namespace Prototype.AndroidOpenAccessory.Fez
             SetString(openedDevice, AndroidAccessoryStringTypes.ManufacturerName, "Prototype Engineering, LLC");
             SetString(openedDevice, AndroidAccessoryStringTypes.ModelName, "Model 1 baby");
             SetString(openedDevice, AndroidAccessoryStringTypes.SerialNumber, "12345");
-            SetString(openedDevice, AndroidAccessoryStringTypes.Uri, "http://http://prototype-eng.com/");
+            SetString(openedDevice, AndroidAccessoryStringTypes.Uri, "http://prototype-eng.com/");
             SetString(openedDevice, AndroidAccessoryStringTypes.Version, "1.2.3");
             Debug.Print("Strings set");
 
