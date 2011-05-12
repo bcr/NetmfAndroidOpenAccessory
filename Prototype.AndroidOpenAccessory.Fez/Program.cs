@@ -186,7 +186,7 @@ namespace Prototype.AndroidOpenAccessory.Fez
             var inBuffer = new byte[inPipe.PipeEndpoint.wMaxPacketSize];
             var outBuffer = new byte[outPipe.PipeEndpoint.wMaxPacketSize];
             int bytesTransferred;
-            OutputPort LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, true);
+            OutputPort LED = new OutputPort((Cpu.Pin)FEZ_Pin.Digital.LED, false);
             InputPort button = new InputPort((Cpu.Pin)FEZ_Pin.Digital.LDR, false, Port.ResistorMode.PullUp);
 
             while (true)
