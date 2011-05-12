@@ -21,13 +21,12 @@ namespace Prototype.AndroidOpenAccessory.Fez
 
         enum AndroidAccessoryStringTypes : byte
         {
-            None = 0,
-            ManufacturerName = 1,
-            ModelName = 2,
-            Description = 3,
-            Version = 4,
-            Uri = 5,
-            SerialNumber = 6,
+            ManufacturerName = 0,
+            ModelName = 1,
+            Description = 2,
+            Version = 3,
+            Uri = 4,
+            SerialNumber = 5,
         }
 
         [Flags]
