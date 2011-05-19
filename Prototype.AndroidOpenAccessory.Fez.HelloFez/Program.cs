@@ -7,7 +7,7 @@ using Microsoft.SPOT.Hardware;
 using GHIElectronics.NETMF.FEZ;
 using GHIElectronics.NETMF.USBHost;
 
-namespace Prototype.AndroidOpenAccessory.Fez
+namespace Prototype.AndroidOpenAccessory.Fez.HelloFez
 {
     public class Program
     {
@@ -124,7 +124,7 @@ namespace Prototype.AndroidOpenAccessory.Fez
                 if (bytesTransferred > 0)
                 {
                     Debug.Print("Received " + inBuffer[0]);
-                    switch ((FezUsbCommands) inBuffer[0])
+                    switch ((FezUsbCommands)inBuffer[0])
                     {
                         case FezUsbCommands.LedOff:
                             LED.Write(false);

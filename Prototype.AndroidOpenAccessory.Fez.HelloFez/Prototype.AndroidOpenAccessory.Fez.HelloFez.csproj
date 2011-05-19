@@ -2,12 +2,12 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <AssemblyName>FEZ Domino Application</AssemblyName>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Prototype.AndroidOpenAccessory.Fez</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Prototype.AndroidOpenAccessory.Fez.HelloFez</RootNamespace>
     <ProjectTypeGuids>{b69e3092-b931-443c-abe7-7e7b65f2a37f};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{E9A87B5C-4759-45F7-ABF3-79A00995D449}</ProjectGuid>
+    <ProjectGuid>{2999A0DE-8CF6-49E5-BF40-163387786FF4}</ProjectGuid>
     <TargetFrameworkVersion>v4.1</TargetFrameworkVersion>
     <NetMfTargetsBaseDir Condition="'$(NetMfTargetsBaseDir)'==''">$(MSBuildExtensionsPath32)\Microsoft\.NET Micro Framework\</NetMfTargetsBaseDir>
   </PropertyGroup>
@@ -29,19 +29,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject />
+    <StartupObject>Prototype.AndroidOpenAccessory.Fez.HelloFez.Program</StartupObject>
   </PropertyGroup>
   <Import Project="$(NetMfTargetsBaseDir)$(TargetFrameworkVersion)\CSharp.Targets" />
   <ItemGroup>
-    <Compile Include="AndroidAccessoryStrings.cs" />
-    <Compile Include="AndroidAccessoryUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="UsbRequestType.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FEZDomino_GHIElectronics.NETMF.FEZ, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -60,5 +58,11 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Prototype.AndroidOpenAccessory.Fez\Prototype.AndroidOpenAccessory.Fez.csproj">
+      <Project>{E9A87B5C-4759-45F7-ABF3-79A00995D449}</Project>
+      <Name>Prototype.AndroidOpenAccessory.Fez</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

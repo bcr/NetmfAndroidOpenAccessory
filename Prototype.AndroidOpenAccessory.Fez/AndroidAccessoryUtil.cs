@@ -22,7 +22,7 @@ namespace Prototype.AndroidOpenAccessory.Fez
         SerialNumber = 5,
     }
 
-    class AndroidAccessoryUtil
+    public class AndroidAccessoryUtil
     {
         static byte[] StringToUtf8NulTerminatedByteArray(string value)
         {
