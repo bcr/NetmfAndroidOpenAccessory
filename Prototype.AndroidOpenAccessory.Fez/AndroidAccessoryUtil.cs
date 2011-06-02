@@ -73,16 +73,41 @@ namespace Prototype.AndroidOpenAccessory.Fez
         public static int GetProtocol(USBH_RawDevice openedDevice)
         {
             var dataBytes = new byte[2];
-            openedDevice.SendSetupTransfer(
-                (byte)(UsbRequestType.DeviceToHost | UsbRequestType.Vendor),
-                (byte)AndroidAccessoryUsbCommands.GetProtocol,
-                0,
-                1,
-                dataBytes,
-                0,
-                dataBytes.Length
-                );
+            try
+            {
+                openedDevice.SendSetupTransfer(
+                    (byte)(UsbRequestType.DeviceToHost | UsbRequestType.Vendor),
+                    (byte)AndroidAccessoryUsbCommands.GetProtocol,
+                    0,
+                    1,
+                    dataBytes,
+                    0,
+                    dataBytes.Length
+                    );
+            }
+            catch (Exception)
+            {
+                // SendSetupTransfer will just blow a generic Exception if it
+                // fails. If this gets changed, catch the more specific
+                // Exception instead. Right now the USB host code always
+                // throws Exception when anything goes wrong, and then you use
+                // USBHostController.GetLastError to see what happened.
+                //
+                // See http://www.tinyclr.com/forum/2/3367/ for details.
 
+                if (USBHostController.GetLastError() == USBH_ERROR.NoError)
+                {
+                    // Some other kind of Exception -- let it fly
+                    throw;
+                }
+
+                // Fake a nonsensical protocol version to signal to the caller
+                // that it's not gonna happen. dataBytes should still be 0
+                // but just to make sure I'll reset it.
+
+                dataBytes[0] = 0;
+                dataBytes[1] = 0;
+            }
             return (dataBytes[1] << 8) | dataBytes[0];
         }
     }
